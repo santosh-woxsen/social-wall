@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Woxsen Social Wall</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #1d1b1b;
+            color: white;
+            box-sizing: border-box;
+        }
+        header {
+            background-color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 9999;
+        }
+        header img {
+            height: 60px;
+            margin: 0 20px;
+        }
+        h1 {
+            color: black;
+            margin: 0;
+            font-size: 1.5em;
+            flex-grow: 1;
+            text-align: center;
+        }
+        body {
+            padding-top: 80px;
+        }
+        main {
+            margin: 20px auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 20px;
+            width: 90%;
+            max-width: 1200px;
+            box-sizing: border-box;
+        }
+        .post-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            overflow: hidden;
+            width: 100%;
+            height: auto;
+        }
+        iframe, blockquote {
+            width: 100%;
+            border: none;
+        }
+        @media (max-width: 1024px) {
+            main {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        @media (max-width: 768px) {
+            main {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 480px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+        .controls-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .controls-container input, .controls-container button {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+    <!-- Twitter widget script -->
+    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    <!-- Instagram embed script -->
+    <script async src="//www.instagram.com/embed.js"></script>
+</head>
+<body>
+    <header>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/9/98/Woxsen.png" alt="Woxsen University">
+        <h1>Woxsen Social Wall</h1>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/9/98/Woxsen.png" alt="Woxsen University">
+    </header>
+
+    <div class="controls-container">
+        <label for="bgColor">Background: </label>
+        <input type="color" id="bgColor" name="bgColor" value="#1d1b1b" onchange="changeBackgroundColor()">
+        <button id="stopScrollBtn" onclick="toggleScrolling()">Stop Scrolling</button>
+    </div>
+
+    <main>
+        <!-- Dynamic Content Based on Platform -->
+        {% for post in tweet_data %}
+            <div class="post-container">
+                {% if post.platform == "Twitter" %}
+                    <blockquote class="twitter-tweet">
+                        <p lang="en" dir="ltr">{{ post.content | safe }}</p>
+                        &mdash; Tweet from 
+                        <a href="{{ post.url }}" target="_blank">{{ post.url }}</a>
+                    </blockquote>
+                {% elif post.platform == "Instagram" %}
+                    <blockquote class="instagram-media" data-instgrm-permalink="{{ post.url }}" data-instgrm-version="14">
+                        <a href="{{ post.url }}" target="_blank"></a>
+                    </blockquote>
+                {% elif post.platform == "Facebook" %}
+                    <iframe src="https://www.facebook.com/plugins/post.php?href={{ post.url | url_encode }}&show_text=true&width=500" width="500" height="537" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true"></iframe>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </main>
+
+    <script>
+        let scrollInterval;
+        let isScrolling = false;
+
+        function startAutoScroll() {
+            if (!isScrolling) {
+                scrollInterval = setInterval(() => {
+                    window.scrollBy(0, 1);
+                    if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight) {
+                        window.scrollTo(0, 0);
+                    }
+                }, 10);
+                isScrolling = true;
+            }
+        }
+
+        function stopAutoScroll() {
+            clearInterval(scrollInterval);
+            isScrolling = false;
+        }
+
+        window.onload = startAutoScroll;
+
+        let scrollTimeout;
+        window.onscroll = () => {
+            clearTimeout(scrollTimeout);
+            if (!isScrolling) {
+                scrollTimeout = setTimeout(() => {
+                    startAutoScroll();
+                }, 1000);
+            }
+        };
+
+        function changeBackgroundColor() {
+            const colorPicker = document.getElementById('bgColor');
+            const selectedColor = colorPicker.value;
+            document.body.style.backgroundColor = selectedColor;
+        }
+
+        function toggleScrolling() {
+            if (isScrolling) {
+                stopAutoScroll();
+                document.getElementById("stopScrollBtn").textContent = "Start Scrolling";
+            } else {
+                startAutoScroll();
+                document.getElementById("stopScrollBtn").textContent = "Stop Scrolling";
+            }
+        }
+    </script>
+</body>
+</html>
