@@ -12,7 +12,7 @@ def get_tweet_data():
     df = pd.read_excel('excel_file.xlsx',sheet_name='dataset')
     
     # Get the first 15 rows 
-    tweet_data = df[['platform','content', 'url']].head(15).to_dict(orient='records')
+    tweet_data = df[['platform','content', 'url']].to_dict(orient='records')
     return tweet_data
 
 @app.route('/')
